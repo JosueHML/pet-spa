@@ -1,0 +1,54 @@
+# Dependencias
+/vendor/
+/node_modules/
+
+# Archivos de entorno
+.env
+.env.backup
+.env.production
+
+# Logs
+/storage/logs/*.log
+*.log
+
+# Cache
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/framework/testing/*
+
+# IDE
+.idea/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Composer
+composer.phar
+composer.lock
+
+# PHPUnit
+.phpunit.result.cache
+.phpunit.cache
+
+# Bases de datos
+*.sql
+*.sqlite
+*.db
+
+# Comprimidos
+*.zip
+*.tar.gz
+*.rar
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Laravel específico
+/public/storage
+/storage/backups
+.env.backup
