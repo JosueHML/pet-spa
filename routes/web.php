@@ -76,8 +76,7 @@ Route::put('/admin/clientes/{id}', [App\Http\Controllers\Admin\ClienteController
 Route::middleware(['auth', 'check.inactivity', 'password.check'])->group(function () {
 
     // DASHBOARDS
-    Route::get('/admin/dashboard', function () { return view('dashboard.admin'); })->name('admin.dashboard');
-    Route::get('/cajero/dashboard', function () { return view('dashboard.cajero'); })->name('cajero.dashboard');
+    Route::get('/admin/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('admin.dashboard');    Route::get('/cajero/dashboard', function () { return view('dashboard.cajero'); })->name('cajero.dashboard');
     Route::get('/groomer/dashboard', function () { return view('dashboard.groomer'); })->name('groomer.dashboard');
     Route::get('/cliente/dashboard', function () { return view('dashboard.cliente'); })->name('cliente.dashboard');
 
@@ -243,6 +242,14 @@ Route::middleware(['auth', 'check.inactivity', 'password.check'])->group(functio
         Route::post('/admin/pruebas/crear-cita', [App\Http\Controllers\Admin\PruebaController::class, 'crearCita'])->name('admin.pruebas.crear-cita');
         Route::post('/admin/pruebas/enviar-recordatorios', [App\Http\Controllers\Admin\PruebaController::class, 'enviarRecordatorios'])->name('admin.pruebas.enviar-recordatorios');
     });
+
+    Route::get('/admin/productividad-groomer', [App\Http\Controllers\Admin\ReportController::class, 'productividadGroomer'])->name('admin.productividad.groomer');
+
+
+
+
+
+
 });
 
 // RUTA HOME

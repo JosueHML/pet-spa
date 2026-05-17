@@ -191,6 +191,14 @@
             transition: all 0.3s ease;
             box-shadow: 0 5px 20px rgba(0,0,0,0.05);
             margin-bottom: 30px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .feature-card.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .feature-card:hover {
@@ -223,6 +231,86 @@
         .feature-card p {
             color: #666;
             line-height: 1.6;
+        }
+
+        /* Stats Section */
+        .stats-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 80px 0;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .stat-item i {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .stat-item h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .stat-item p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* Testimonios Section */
+        .testimonials-section {
+            padding: 80px 0;
+            background: #f8f9fa;
+        }
+
+        .testimonial-card {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .testimonial-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .testimonial-card i.fa-quote-left {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .testimonial-card p {
+            color: #555;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .stars {
+            color: #ffc107;
+            margin-bottom: 15px;
+        }
+
+        .testimonial-card h6 {
+            font-weight: 600;
+            color: #333;
+            margin-top: 10px;
         }
 
         /* Footer */
@@ -273,6 +361,9 @@
             .hero-subtitle {
                 font-size: 1rem;
             }
+            .stat-item h2 {
+                font-size: 1.8rem;
+            }
         }
     </style>
 </head>
@@ -294,6 +385,9 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#features">Servicios</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#testimonials">Testimonios</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#contact">Contacto</a>
@@ -370,7 +464,7 @@
                             <i class="fas fa-shopping-cart"></i>
                         </div>
                         <h4>Tienda de Productos</h4>
-                        <p>Alimentos, juguetes, accesorios y productos de higiene.</p>
+                        <p>Alimentos, juguetes, accesorios y productos de higiene para mascotas.</p>
                     </div>
                 </div>
                 <div class="col-md-4">
@@ -379,7 +473,97 @@
                             <i class="fas fa-calendar-check"></i>
                         </div>
                         <h4>Agenda en Línea</h4>
-                        <p>Agenda tus citas fácilmente y recibe recordatorios automáticos.</p>
+                        <p>Agenda tus citas fácilmente y recibe recordatorios automáticos por email.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md-3">
+                    <div class="stat-item">
+                        <i class="fas fa-smile"></i>
+                        <h2 class="counter" data-target="500">0</h2>
+                        <p>Mascotas felices</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-item">
+                        <i class="fas fa-scissors"></i>
+                        <h2 class="counter" data-target="1000">0</h2>
+                        <p>Servicios realizados</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-item">
+                        <i class="fas fa-users"></i>
+                        <h2 class="counter" data-target="200">0</h2>
+                        <p>Clientes registrados</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-item">
+                        <i class="fas fa-star"></i>
+                        <h2 class="counter" data-target="5" data-decimals="1">0.0</h2>
+                        <p>Calificación promedio</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonios Section -->
+    <section class="testimonials-section" id="testimonials">
+        <div class="container">
+            <div class="section-title">
+                <h2>Lo que dicen nuestros clientes</h2>
+                <p>Más de 500 mascotas felices nos respaldan</p>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="testimonial-card">
+                        <i class="fas fa-quote-left fa-2x"></i>
+                        <p>"Excelente servicio, mi perrito quedó hermoso. Muy profesionales y atentos. Definitivamente volveré."</p>
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <h6>- María González</h6>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="testimonial-card">
+                        <i class="fas fa-quote-left fa-2x"></i>
+                        <p>"La agenda online es muy práctica. Los recordatorios por email me ayudan a no olvidar las citas de mi mascota."</p>
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <h6>- Carlos Rodríguez</h6>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="testimonial-card">
+                        <i class="fas fa-quote-left fa-2x"></i>
+                        <p>"Los productos de la tienda son de excelente calidad y el pedido por WhatsApp es súper rápido."</p>
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <h6>- Ana Laura</h6>
                     </div>
                 </div>
             </div>
@@ -399,6 +583,7 @@
                     <ul class="list-unstyled">
                         <li><a href="#home">Inicio</a></li>
                         <li><a href="#features">Servicios</a></li>
+                        <li><a href="#testimonials">Testimonios</a></li>
                         @guest
                             <li><a href="{{ route('login') }}">Iniciar Sesión</a></li>
                             <li><a href="{{ route('register') }}">Registrarse</a></li>
@@ -408,7 +593,7 @@
                 <div class="col-md-4">
                     <h5>Contacto</h5>
                     <ul class="list-unstyled">
-                        <li><i class="fas fa-phone"></i> +591 12345678</li>
+                        <li><i class="fas fa-phone"></i> +591 69866825</li>
                         <li><i class="fas fa-envelope"></i> info@petspa.com</li>
                         <li><i class="fas fa-map-marker-alt"></i> La Paz - Bolivia</li>
                     </ul>
@@ -416,11 +601,78 @@
             </div>
             <div class="footer-bottom">
                 <p>&copy; {{ date('Y') }} Pet Spa. Todos los derechos reservados.</p>
-                <p>Desarrollado por: Cano Quispe Lisbeth Nicole, Mamani Laguna Josue Hugo, Rojas Cali Grover Gustavo</p>
+                <p>Desarrollado por: [JOSUE HUGO MAMANI LAGUNA]</p>
             </div>
         </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // 1. Animación de tarjetas al hacer scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: "0px 0px -50px 0px"
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        // Observar tarjetas de características
+        document.querySelectorAll('.feature-card').forEach(card => {
+            observer.observe(card);
+        });
+
+        // Observar tarjetas de testimonios
+        document.querySelectorAll('.testimonial-card').forEach(card => {
+            observer.observe(card);
+        });
+
+        // 2. Contadores animados
+        function animateCounter(element) {
+            const target = parseFloat(element.getAttribute('data-target'));
+            const hasDecimals = element.getAttribute('data-decimals') === '1';
+            const duration = 2000;
+            const step = target / (duration / 16);
+            let current = 0;
+            
+            const timer = setInterval(() => {
+                current += step;
+                if (current >= target) {
+                    if (hasDecimals) {
+                        element.innerText = target.toFixed(1);
+                    } else {
+                        element.innerText = Math.floor(target);
+                    }
+                    clearInterval(timer);
+                } else {
+                    if (hasDecimals) {
+                        element.innerText = current.toFixed(1);
+                    } else {
+                        element.innerText = Math.floor(current);
+                    }
+                }
+            }, 16);
+        }
+
+        // Activar contadores cuando sean visibles
+        const counterObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounter(entry.target);
+                    counterObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll('.counter').forEach(counter => {
+            counterObserver.observe(counter);
+        });
+    </script>
 </body>
 </html>

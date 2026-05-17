@@ -91,7 +91,7 @@
                         </div>
                         <div class="col-md-4 mb-3">
                             <div class="card text-center">
-                                <div class-card-body">
+                                <div class="card-body">
                                     <i class="fas fa-history fa-2x text-secondary mb-2"></i>
                                     <h5>Log de Auditoría</h5>
                                     <a href="{{ route('admin.logs') }}" class="btn btn-sm btn-secondary">Ver logs</a>
@@ -134,6 +134,16 @@
                         <div class="btn-group mt-2" role="group">
                             <a href="{{ route('admin.pruebas') }}" class="btn btn-warning">🧪 Ir al Panel de Pruebas</a>
                             <a href="{{ route('notificaciones.index') }}" class="btn btn-info">🔔 Ver Notificaciones</a>
+                        </div>
+                    </div>
+
+                    <!-- Panel de Productividad -->
+                    <div class="alert alert-success mt-3">
+                        <strong>📈 Reportes Avanzados:</strong>
+                        <div class="btn-group mt-2" role="group">
+                            <a href="{{ route('admin.productividad.groomer') }}" class="btn btn-success">
+                                <i class="fas fa-chart-line"></i> 📊 Productividad por Groomer
+                            </a>
                         </div>
                     </div>
                 </div>

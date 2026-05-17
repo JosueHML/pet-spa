@@ -161,27 +161,46 @@ class GroomingController extends Controller
     public function recibirInsumos(Request $request, $id_ficha)
     {
         $ficha = FichaGrooming::findOrFail($id_ficha);
-        
+
         if ($request->has('insumos_recibir')) {
             foreach ($request->insumos_recibir as $item) {
                 if (isset($item['recibir']) && $item['recibir'] == 1) {
                     $cantidad = $item['cantidad'] ?? 1;
-                    
-                    // Guardar en grooming_insumos
-                    DB::table('grooming_insumos')->updateOrInsert(
-                        ['id_ficha' => $id_ficha, 'id_insumo' => $item['id_insumo']],
-                        [
-                            'cantidad_recibida' => DB::raw("cantidad_recibida + $cantidad"),
+
+                    // Buscar si ya existe un registro
+                    $existe = DB::table('grooming_insumos')
+                        ->where('id_ficha', $id_ficha)
+                        ->where('id_insumo', $item['id_insumo'])
+                        ->first();
+
+                    if ($existe) {
+                        // Actualizar sumando la cantidad
+                        DB::table('grooming_insumos')
+                            ->where('id_ficha', $id_ficha)
+                            ->where('id_insumo', $item['id_insumo'])
+                            ->update([
+                                'cantidad_recibida' => $existe->cantidad_recibida + $cantidad,
+                                'updated_at' => now(),
+                            ]);
+                    } else {
+                        // Crear nuevo registro
+                        DB::table('grooming_insumos')->insert([
+                            'id_ficha' => $id_ficha,
+                            'id_insumo' => $item['id_insumo'],
+                            'cantidad_recibida' => $cantidad,
+                            'cantidad_usada' => 0,
+                            'usado' => false,
+                            'created_at' => now(),
                             'updated_at' => now(),
-                        ]
-                    );
-                    
+                        ]);
+                    }
+
                     // Descontar del stock global
                     DB::table('insumos')->where('id_insumo', $item['id_insumo'])->decrement('stock_actual', $cantidad);
                 }
             }
         }
-        
+
         return redirect()->back()->with('success', 'Materiales recibidos registrados correctamente');
     }
 }

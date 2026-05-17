@@ -56,8 +56,8 @@ class ReportController extends Controller
             ->limit(5)
             ->get();
 
-        // Top productos más vendidos (comentado porque la tabla venta_producto no existe aún)
-        $topProductos = collect(); // Colección vacía para evitar error
+        // Top productos más vendidos
+        $topProductos = collect();
 
         // Ticket promedio
         $ticketPromedio = Factura::where('estado_pago', 'PAGADO')->avg('total');
@@ -92,5 +92,26 @@ class ReportController extends Controller
             'totalFacturas',
             'totalClientes'
         ));
+    }
+
+    public function productividadGroomer()
+    {
+        // Productividad por groomer (citas completadas) - CORREGIDO
+        $productividad = Cita::select(
+                'groomers.id_groomer',
+                'users.name as groomer_name',
+                DB::raw('COUNT(*) as total_citas'),
+                DB::raw('ROUND(AVG(TIMESTAMPDIFF(MINUTE, citas.fecha_inicio, citas.fecha_fin)), 0) as tiempo_promedio'),
+                DB::raw('SUM(facturas.total) as total_ingresos')
+            )
+            ->join('groomers', 'citas.id_groomer', '=', 'groomers.id_groomer')
+            ->join('users', 'groomers.id_usuario', '=', 'users.id')
+            ->leftJoin('facturas', 'citas.id_cita', '=', 'facturas.id_cita')
+            ->where('citas.estado', 'COMPLETADA')
+            ->groupBy('groomers.id_groomer', 'users.name')
+            ->orderBy('total_citas', 'desc')
+            ->get();
+
+        return view('admin.productividad', compact('productividad'));
     }
 }
