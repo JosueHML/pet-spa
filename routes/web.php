@@ -245,9 +245,9 @@ Route::middleware(['auth', 'check.inactivity', 'password.check'])->group(functio
 
     Route::get('/admin/productividad-groomer', [App\Http\Controllers\Admin\ReportController::class, 'productividadGroomer'])->name('admin.productividad.groomer');
 
+    Route::get('/mascotas/{id}/recomendaciones', [MascotaController::class, 'recomendaciones'])->name('mascotas.recomendaciones');
 
-
-
+    Route::get('/citas/horarios-ocupados/{groomer_id}/{fecha}', [CitaController::class, 'getHorariosOcupados'])->name('citas.horarios.ocupados');
 
 
 });

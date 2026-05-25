@@ -45,3 +45,7 @@
     </div>
 </div>
 @endsection
+
+<a href="{{ route('mascotas.recomendaciones', $mascota->id_mascota) }}" class="btn btn-info btn-sm">
+    <i class="fas fa-robot"></i> 🤖 Recomendaciones IA
+</a>

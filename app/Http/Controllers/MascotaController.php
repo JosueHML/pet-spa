@@ -122,4 +122,33 @@ class MascotaController extends Controller
             return redirect()->route('mascotas.index')->with('error', 'Error al eliminar la mascota.');
         }
     }
+
+    public function recomendaciones($id)
+    {
+        $mascota = Mascota::with(['cliente.user'])->findOrFail($id);
+        
+        // Reglas de recomendación según tamaño y temperamento
+        $recomendaciones = [];
+        
+        switch ($mascota->tamanio) {
+            case 'pequeño':
+                $recomendaciones[] = ['nombre' => 'Cepillo suave para pelo corto', 'precio' => 15000, 'imagen' => 'cepillo.jpg'];
+                $recomendaciones[] = ['nombre' => 'Champú para piel sensible', 'precio' => 25000, 'imagen' => 'champu.jpg'];
+                break;
+            case 'mediano':
+                $recomendaciones[] = ['nombre' => 'Cepillo de cerdas firmes', 'precio' => 20000, 'imagen' => 'cepillo.jpg'];
+                $recomendaciones[] = ['nombre' => 'Champú antipulgas', 'precio' => 30000, 'imagen' => 'champu.jpg'];
+                break;
+            case 'grande':
+                $recomendaciones[] = ['nombre' => 'Cepillo deslanador', 'precio' => 35000, 'imagen' => 'cepillo.jpg'];
+                $recomendaciones[] = ['nombre' => 'Champú para pelo largo', 'precio' => 35000, 'imagen' => 'champu.jpg'];
+                break;
+        }
+        
+        if ($mascota->temperamento == 'nervioso') {
+            $recomendaciones[] = ['nombre' => 'Ferlax - Calmante natural', 'precio' => 45000, 'imagen' => 'ferlax.jpg'];
+        }
+        
+        return view('mascotas.recomendaciones', compact('mascota', 'recomendaciones'));
+    }
 }

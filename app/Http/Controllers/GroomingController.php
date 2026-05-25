@@ -6,6 +6,7 @@ use App\Models\FichaGrooming;
 use App\Models\Cita;
 use App\Models\Insumo;
 use App\Models\ServicioInsumo;
+use App\Models\Notificacion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
@@ -155,7 +156,22 @@ class GroomingController extends Controller
             DB::table('insumos')->where('id_insumo', $item->id_insumo)->decrement('stock_actual', $item->cantidad_usada);
         }
 
-        return redirect()->route('citas.index')->with('success', 'Servicio completado correctamente');
+        // =============================================
+        // NOTIFICACIÓN "LISTO PARA RECOGER" AL CLIENTE
+        // =============================================
+        $cliente = $ficha->cita->mascota->cliente;
+        $user = $cliente->user;
+
+        Notificacion::create([
+            'id_usuario' => $user->id,
+            'tipo' => 'LISTO_RECOGER',
+            'mensaje' => "✅ Tu mascota {$ficha->cita->mascota->nombre_mascota} está lista para recoger. Pasá por el spa cuando quieras.",
+            'canal' => 'EMAIL',
+            'destino' => $user->email,
+            'estado' => 'ENVIADO'
+        ]);
+
+        return redirect()->route('citas.index')->with('success', 'Servicio completado correctamente. Se notificó al cliente.');
     }
 
     public function recibirInsumos(Request $request, $id_ficha)
