@@ -86,6 +86,19 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #5a67d8;
         }
+        
+        .badge-notification {
+            position: absolute;
+            top: 0;
+            right: 0;
+            transform: translate(50%, -50%);
+            font-size: 0.7rem;
+            padding: 0.2rem 0.4rem;
+        }
+        
+        .nav-item {
+            position: relative;
+        }
     </style>
 
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
@@ -139,9 +152,17 @@
                                     <i class="fas fa-shopping-cart"></i> 🛒 Carrito
                                 </a>
                             </li>
-                            <li class="nav-item">
+                            <li class="nav-item position-relative">
                                 <a class="nav-link text-white" href="{{ route('notificaciones.index') }}">
                                     <i class="fas fa-bell"></i> Notificaciones
+                                    @php
+                                        $notificacionesNoLeidas = App\Models\Notificacion::where('id_usuario', Auth::id())
+                                            ->where('leida', 0)
+                                            ->count();
+                                    @endphp
+                                    @if($notificacionesNoLeidas > 0)
+                                        <span class="badge bg-danger rounded-pill badge-notification">{{ $notificacionesNoLeidas }}</span>
+                                    @endif
                                 </a>
                             </li>
                         @endauth

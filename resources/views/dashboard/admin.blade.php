@@ -146,6 +146,16 @@
                             </a>
                         </div>
                     </div>
+
+                    <!-- Alertas de Consumo -->
+                    <div class="alert alert-warning mt-3">
+                        <strong>⚠️ Alertas de Inventario:</strong>
+                        <div class="btn-group mt-2" role="group">
+                            <a href="{{ route('admin.alertas.consumo') }}" class="btn btn-warning">
+                                <i class="fas fa-exclamation-triangle"></i> ⚠️ Alertas de Consumo
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

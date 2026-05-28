@@ -17,17 +17,22 @@ class NotificacionController extends Controller
     {
         $notificaciones = Notificacion::where('id_usuario', Auth::id())
             ->orderBy('created_at', 'desc')
-            ->paginate(15);
+            ->get();
         
         return view('notificaciones.index', compact('notificaciones'));
     }
 
     public function marcarLeida($id)
     {
-        $notificacion = Notificacion::where('id_usuario', Auth::id())->findOrFail($id);
-        $notificacion->estado = 'LEIDA';
-        $notificacion->save();
-
-        return redirect()->route('notificaciones.index')->with('success', 'Notificación marcada como leída');
+        $notificacion = Notificacion::where('id_notificacion', $id)
+            ->where('id_usuario', Auth::id())
+            ->first();
+        
+        if ($notificacion) {
+            $notificacion->leida = true;
+            $notificacion->save();
+        }
+        
+        return redirect()->back();
     }
 }

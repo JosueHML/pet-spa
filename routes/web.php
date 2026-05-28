@@ -22,6 +22,8 @@ use App\Http\Controllers\NotificacionController;
 use App\Http\Controllers\Admin\SolicitudFacturaController;
 use App\Http\Controllers\Admin\CierreCajaController;
 use App\Http\Controllers\Admin\PromocionController;
+use Illuminate\Http\Request;  // 👈 ESTO ES IMPORTANTE
+
 
 /*
 |--------------------------------------------------------------------------
@@ -260,3 +262,70 @@ Route::get('/home', function () {
 if (file_exists(__DIR__.'/auth.php')) {
     require __DIR__.'/auth.php';
 }
+
+// Alertas de consumo - SOLO UNA VEZ
+Route::get('/admin/alertas-consumo', function() {
+    $alertas = DB::table('notificaciones')
+        ->where('tipo', 'CONSUMO_ELEVADO')
+        ->where('estado', 'PENDIENTE')
+        ->orderBy('created_at', 'desc')
+        ->get();
+    return view('admin.alertas_consumo', compact('alertas'));
+})->name('admin.alertas.consumo');
+
+Route::post('/admin/alertas/actualizar/{id}', function($id, Request $request) {
+    $accion = $request->input('accion');
+    $estado = ($accion == 'aprobar') ? 'APROBADA' : 'RECHAZADA';
+    
+    DB::table('notificaciones')
+        ->where('id_notificacion', $id)
+        ->update([
+            'estado' => $estado,
+            'updated_at' => now()
+        ]);
+    
+    return redirect()->back()->with('success', "Alerta {$estado} correctamente");
+})->name('admin.alertas.actualizar');
+
+Route::post('/admin/alertas/actualizar/{id}', function($id, Request $request) {
+    $accion = $request->input('accion');
+    $estado = ($accion == 'aprobar') ? 'APROBADA' : 'RECHAZADA';
+    
+    // Obtener la alerta antes de actualizar
+    $alerta = DB::table('notificaciones')->where('id_notificacion', $id)->first();
+    
+    // Extraer el groomer del mensaje (ej: "⚠️ ALERTA: El groomer Ana Estilista registró...")
+    preg_match('/El groomer ([^ ]+)/', $alerta->mensaje, $matches);
+    $nombreGroomer = $matches[1] ?? 'Desconocido';
+    
+    // Buscar el ID del usuario groomer por su nombre
+    $groomerUser = DB::table('users')->where('name', 'like', "%{$nombreGroomer}%")->first();
+    
+    // Crear notificación para el GROOMER
+    $mensajeGroomer = ($accion == 'aprobar') 
+        ? "✅ Tu solicitud de consumo elevado ha sido APROBADA por el administrador."
+        : "❌ Tu solicitud de consumo elevado ha sido RECHAZADA por el administrador. Por favor, justifica el consumo.";
+    
+    if ($groomerUser) {
+        DB::table('notificaciones')->insert([
+            'id_usuario' => $groomerUser->id,
+            'tipo' => 'RESPUESTA_CONSUMO',
+            'mensaje' => $mensajeGroomer,
+            'canal' => 'EMAIL',
+            'destino' => $groomerUser->email,
+            'estado' => 'ENVIADO',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+    
+    // Actualizar la alerta original
+    DB::table('notificaciones')
+        ->where('id_notificacion', $id)
+        ->update([
+            'estado' => $estado,
+            'updated_at' => now()
+        ]);
+    
+    return redirect()->back()->with('success', "Alerta {$estado}. Se notificó al groomer.");
+})->name('admin.alertas.actualizar');

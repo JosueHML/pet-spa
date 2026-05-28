@@ -13,6 +13,12 @@
             @if(session('error'))
                 <div class="alert alert-danger">{{ session('error') }}</div>
             @endif
+            @if(session('warning'))
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle"></i> {{ session('warning') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
 
             <!-- Datos de la cita -->
             <div class="row mb-4">
@@ -111,6 +117,50 @@
 
             <hr>
 
+            <!-- Panel de Materiales (Insumos a usar) -->
+            <h5>📦 Materiales utilizados</h5>
+            <form method="POST" action="{{ route('grooming.update.insumos', $ficha->id_ficha) }}">
+                @csrf
+                <div class="alert alert-info">
+                    <small>⚠️ Si usas más de 3 unidades de un insumo, se generará una alerta al administrador.</small>
+                </div>
+                <table class="table table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Insumo</th>
+                            <th>Stock disponible</th>
+                            <th>Cantidad a usar</th>
+                            <th>Usar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($insumosServicio as $index => $item)
+                        @php
+                            $usado = $insumosUsados->where('id_insumo', $item->id_insumo)->first();
+                        @endphp
+                        <tr>
+                            <td>{{ $item->insumo->nombre }}</td>
+                            <td>{{ $item->insumo->stock_actual }} unidades</span></td>
+                            <td>
+                                <input type="number" name="insumos[{{ $index }}][cantidad]" 
+                                    class="form-control" style="width:100px" 
+                                    value="{{ $usado->cantidad_usada ?? $item->cantidad }}"
+                                    min="0" max="{{ $item->insumo->stock_actual }}">
+                            </div>
+                            <td>
+                                <input type="checkbox" name="insumos[{{ $index }}][usado]" value="1" 
+                                    {{ $usado ? 'checked' : '' }}>
+                                <input type="hidden" name="insumos[{{ $index }}][id_insumo]" value="{{ $item->id_insumo }}">
+                            </div>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+                <button type="submit" class="btn btn-warning">Registrar Materiales Usados</button>
+            </form>
+
+            <hr>
+
             <!-- Registro de Salida de Insumos (Recibir materiales) -->
             <h5>📥 Registrar Salida de Insumos</h5>
             <form method="POST" action="{{ route('grooming.recibir.insumos', $ficha->id_ficha) }}">
@@ -128,16 +178,16 @@
                         @foreach($insumosServicio as $index => $item)
                         <tr>
                             <td>{{ $item->insumo->nombre }}</td>
-                            <td>{{ $item->insumo->stock_actual }} unidades</td>
+                            <td>{{ $item->insumo->stock_actual }} unidades</span></td>
                             <td>
                                 <input type="number" name="insumos_recibir[{{ $index }}][cantidad]" 
                                     class="form-control" style="width:100px" 
                                     value="{{ $item->cantidad }}" min="0" max="{{ $item->insumo->stock_actual }}">
-                            </td>
+                            </div>
                             <td>
                                 <input type="checkbox" name="insumos_recibir[{{ $index }}][recibir]" value="1">
                                 <input type="hidden" name="insumos_recibir[{{ $index }}][id_insumo]" value="{{ $item->id_insumo }}">
-                            </td>
+                            </div>
                         </tr>
                         @endforeach
                     </tbody>
@@ -146,6 +196,7 @@
             </form>
 
             <hr>
+
             <!-- Fotos antes/después -->
             <h5>📸 Fotos del servicio</h5>
             <div class="row">

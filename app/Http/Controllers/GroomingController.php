@@ -72,20 +72,74 @@ class GroomingController extends Controller
     public function updateInsumos(Request $request, $id_ficha)
     {
         $ficha = FichaGrooming::findOrFail($id_ficha);
+        $alertas = [];
+        $limiteMaximo = 3; // Máximo permitido sin alerta
         
         if ($request->has('insumos')) {
             foreach ($request->insumos as $item) {
                 if (isset($item['usado']) && $item['usado'] == 1) {
-                    DB::table('grooming_insumos')->updateOrInsert(
-                        ['id_ficha' => $id_ficha, 'id_insumo' => $item['id_insumo']],
-                        [
-                            'cantidad_usada' => $item['cantidad'] ?? 1,
-                            'usado' => true,
+                    $cantidad = (int)($item['cantidad'] ?? 1);
+                    $insumo = Insumo::find($item['id_insumo']);
+                    
+                    // ALERTA: Si la cantidad es mayor a 3 unidades
+                    if ($cantidad > $limiteMaximo) {
+                        $alertas[] = [
+                            'insumo' => $insumo->nombre,
+                            'cantidad' => $cantidad,
+                            'limite' => $limiteMaximo,
+                            'groomer' => auth()->user()->name
+                        ];
+                        
+                        // Crear notificación para ADMIN (corregido)
+                        // Crear notificación para ADMIN
+                        DB::table('notificaciones')->insert([
+                            'id_usuario' => 1, // Admin principal
+                            'tipo' => 'CONSUMO_ELEVADO',
+                            'mensaje' => "⚠️ ALERTA: El groomer " . auth()->user()->name . " registró {$cantidad} unidades de '{$insumo->nombre}'. Límite máximo: {$limiteMaximo} unidades.",
+                            'canal' => 'EMAIL',
+                            'destino' => 'admin@petspa.com',
+                            'estado' => 'PENDIENTE',
+                            'created_at' => now(),
                             'updated_at' => now(),
-                        ]
-                    );
+                        ]);
+                    }
+                    
+                    // Guardar o actualizar el uso de insumo
+                    $existe = DB::table('grooming_insumos')
+                        ->where('id_ficha', $id_ficha)
+                        ->where('id_insumo', $item['id_insumo'])
+                        ->first();
+                    
+                    if ($existe) {
+                        DB::table('grooming_insumos')
+                            ->where('id_ficha', $id_ficha)
+                            ->where('id_insumo', $item['id_insumo'])
+                            ->update([
+                                'cantidad_usada' => $existe->cantidad_usada + $cantidad,
+                                'usado' => true,
+                                'updated_at' => now(),
+                            ]);
+                    } else {
+                        DB::table('grooming_insumos')->insert([
+                            'id_ficha' => $id_ficha,
+                            'id_insumo' => $item['id_insumo'],
+                            'cantidad_usada' => $cantidad,
+                            'usado' => true,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }
                 }
             }
+        }
+        
+        if (!empty($alertas)) {
+            $mensajeAlerta = "⚠️ Consumo elevado detectado: ";
+            foreach ($alertas as $alerta) {
+                $mensajeAlerta .= "{$alerta['insumo']}: {$alerta['cantidad']} (máx {$alerta['limite']}), ";
+            }
+            $mensajeAlerta .= "Se ha notificado al administrador.";
+            return redirect()->back()->with('warning', $mensajeAlerta);
         }
 
         return redirect()->back()->with('success', 'Insumos registrados correctamente');
