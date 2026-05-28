@@ -17,6 +17,8 @@ class Producto extends Model
         'sku',
         'categoria',
         'stock_actual',
-        'precio'
+        'stock_minimo',
+        'precio',
+        'imagen_url'
     ];
 }

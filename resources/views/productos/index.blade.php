@@ -11,7 +11,7 @@
                 </a>
                 @auth
                     @if(Auth::user()->id_rol == 1)
-                        <a href="{{ route('productos.create') }}" class="btn btn-light btn-sm">
+                        <a href="{{ url('/admin/productos/crear') }}" class="btn btn-light btn-sm">
                             + Nuevo Producto
                         </a>
                     @endif

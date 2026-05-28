@@ -14,7 +14,7 @@ class ProductoController extends Controller
 
     public function index()
     {
-        $productos = Producto::all();
+        $productos = Producto::orderBy('created_at', 'desc')->paginate(12);
         return view('productos.index', compact('productos'));
     }
 
@@ -25,16 +25,35 @@ class ProductoController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'nombre_producto' => 'required|string|max:200',
-            'sku' => 'required|string|max:100|unique:productos',
-            'categoria' => 'nullable|string|max:100',
-            'stock_actual' => 'required|integer|min:0',
-            'precio' => 'required|numeric|min:0',
-        ]);
+        try {
+            $request->validate([
+                'nombre_producto' => 'required|string|max:200',
+                'sku' => 'required|string|max:100|unique:productos,sku',
+                'categoria' => 'nullable|string|max:100',
+                'stock_actual' => 'required|integer|min:0',
+                'precio' => 'required|numeric|min:0',
+            ]);
 
-        Producto::create($request->all());
-        return redirect()->route('productos.index')->with('success', 'Producto creado correctamente');
+            $producto = new Producto();
+            $producto->nombre_producto = $request->nombre_producto;
+            $producto->sku = $request->sku;
+            $producto->categoria = $request->categoria;
+            $producto->stock_actual = $request->stock_actual;
+            $producto->stock_minimo = 5;
+            $producto->precio = $request->precio;
+            $producto->save();
+
+            return redirect()->route('productos.index')->with('success', 'Producto creado correctamente');
+            
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error al crear producto: ' . $e->getMessage());
+        }
+    }
+
+    public function show($id)
+    {
+        $producto = Producto::findOrFail($id);
+        return view('productos.show', compact('producto'));
     }
 
     public function edit($id)
@@ -54,7 +73,13 @@ class ProductoController extends Controller
         ]);
 
         $producto = Producto::findOrFail($id);
-        $producto->update($request->all());
+        $producto->nombre_producto = $request->nombre_producto;
+        $producto->sku = $request->sku;
+        $producto->categoria = $request->categoria;
+        $producto->stock_actual = $request->stock_actual;
+        $producto->precio = $request->precio;
+        $producto->save();
+
         return redirect()->route('productos.index')->with('success', 'Producto actualizado correctamente');
     }
 
@@ -62,6 +87,7 @@ class ProductoController extends Controller
     {
         $producto = Producto::findOrFail($id);
         $producto->delete();
+
         return redirect()->route('productos.index')->with('success', 'Producto eliminado correctamente');
     }
 }

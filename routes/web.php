@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use App\Http\Controllers\MascotaController;
 use App\Http\Controllers\ServicioController;
 use App\Http\Controllers\ProductoController;
@@ -22,8 +23,10 @@ use App\Http\Controllers\NotificacionController;
 use App\Http\Controllers\Admin\SolicitudFacturaController;
 use App\Http\Controllers\Admin\CierreCajaController;
 use App\Http\Controllers\Admin\PromocionController;
-use Illuminate\Http\Request;  // 👈 ESTO ES IMPORTANTE
-
+use App\Http\Controllers\Admin\CompraController;
+use App\Http\Controllers\InsumoController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\PruebaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -78,7 +81,8 @@ Route::put('/admin/clientes/{id}', [App\Http\Controllers\Admin\ClienteController
 Route::middleware(['auth', 'check.inactivity', 'password.check'])->group(function () {
 
     // DASHBOARDS
-    Route::get('/admin/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('admin.dashboard');    Route::get('/cajero/dashboard', function () { return view('dashboard.cajero'); })->name('cajero.dashboard');
+    Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/cajero/dashboard', function () { return view('dashboard.cajero'); })->name('cajero.dashboard');
     Route::get('/groomer/dashboard', function () { return view('dashboard.groomer'); })->name('groomer.dashboard');
     Route::get('/cliente/dashboard', function () { return view('dashboard.cliente'); })->name('cliente.dashboard');
 
@@ -112,19 +116,28 @@ Route::middleware(['auth', 'check.inactivity', 'password.check'])->group(functio
     Route::get('/productos/{id}', [ProductoController::class, 'show'])->name('productos.show');
 
     // =============================================
-    // PRODUCTOS (CRUD SOLO ADMIN)
+    // SERVICIOS (CRUD SOLO ADMIN)
     // =============================================
     Route::middleware(['role:1'])->group(function () {
-        Route::get('/productos/create', [ProductoController::class, 'create'])->name('productos.create');
-        Route::post('/productos', [ProductoController::class, 'store'])->name('productos.store');
+        Route::resource('servicios', ServicioController::class);
+    });
+
+    // =============================================
+    // INSUMOS (CRUD SOLO ADMIN)
+    // =============================================
+    Route::middleware(['role:1'])->group(function () {
+        Route::resource('insumos', InsumoController::class);
+    });
+
+    // =============================================
+    // PRODUCTOS (CRUD SOLO ADMIN) - RUTAS CORREGIDAS
+    // =============================================
+    Route::middleware(['role:1'])->group(function () {
+        Route::get('/admin/productos/crear', [ProductoController::class, 'create'])->name('admin.productos.crear');
+        Route::post('/admin/productos/guardar', [ProductoController::class, 'store'])->name('admin.productos.guardar');
         Route::get('/productos/{id}/edit', [ProductoController::class, 'edit'])->name('productos.edit');
         Route::put('/productos/{id}', [ProductoController::class, 'update'])->name('productos.update');
         Route::delete('/productos/{id}', [ProductoController::class, 'destroy'])->name('productos.destroy');
-    });
-
-    // SERVICIOS (CRUD SOLO ADMIN)
-    Route::middleware(['role:1'])->group(function () {
-        Route::resource('servicios', ServicioController::class);
     });
 
     // CAJERO Y ADMIN - FACTURAS Y CITAS
@@ -147,9 +160,7 @@ Route::middleware(['auth', 'check.inactivity', 'password.check'])->group(functio
     Route::post('/2fa/verify', [TwoFactorController::class, 'verify']);
     Route::post('/2fa/disable', [TwoFactorController::class, 'disable'])->name('2fa.disable');
 
-    // =============================================
-    // GROOMING (TODAS LAS RUTAS JUNTAS)
-    // =============================================
+    // GROOMING
     Route::prefix('grooming')->group(function () {
         Route::get('/{cita_id}', [GroomingController::class, 'show'])->name('grooming.show');
         Route::post('/upload-foto', [GroomingController::class, 'uploadFoto'])->name('grooming.upload_foto');
@@ -161,32 +172,20 @@ Route::middleware(['auth', 'check.inactivity', 'password.check'])->group(functio
         Route::post('/cerrar/{id}', [GroomingController::class, 'cerrarServicio'])->name('grooming.cerrar');
     });
 
-    // =============================================
     // GROOMER - RUTAS ESPECÍFICAS
-    // =============================================
     Route::prefix('groomer')->group(function () {
         Route::get('/fichas-activas', function() {
-            $fichas = App\Models\FichaGrooming::with(['cita.mascota', 'cita.servicio'])
-                ->where('estado_ficha', 'ABIERTA')
-                ->get();
+            $fichas = App\Models\FichaGrooming::with(['cita.mascota', 'cita.servicio'])->where('estado_ficha', 'ABIERTA')->get();
             return view('groomer.fichas_activas', compact('fichas'));
         })->name('grooming.fichas.activas');
 
         Route::get('/checklist', function() {
-            $fichas = App\Models\FichaGrooming::with(['cita.mascota', 'cita.servicio'])
-                ->whereNotNull('checklist_json')
-                ->orderBy('created_at', 'desc')
-                ->limit(20)
-                ->get();
+            $fichas = App\Models\FichaGrooming::with(['cita.mascota', 'cita.servicio'])->whereNotNull('checklist_json')->orderBy('created_at', 'desc')->limit(20)->get();
             return view('groomer.checklist', compact('fichas'));
         })->name('grooming.checklist');
 
         Route::get('/fotos', function() {
-            $fichas = App\Models\FichaGrooming::with(['cita.mascota'])
-                ->whereNotNull('foto_antes')
-                ->orWhereNotNull('foto_despues')
-                ->orderBy('created_at', 'desc')
-                ->get();
+            $fichas = App\Models\FichaGrooming::with(['cita.mascota'])->whereNotNull('foto_antes')->orWhereNotNull('foto_despues')->orderBy('created_at', 'desc')->get();
             return view('groomer.fotos', compact('fichas'));
         })->name('grooming.fotos');
     });
@@ -204,7 +203,7 @@ Route::middleware(['auth', 'check.inactivity', 'password.check'])->group(functio
     Route::get('/mis-notificaciones', [NotificacionController::class, 'index'])->name('notificaciones.index');
     Route::get('/notificacion/marcar-leida/{id}', [NotificacionController::class, 'marcarLeida'])->name('notificacion.marcar-leida');
 
-    // SOLICITUDES DE FACTURA (ADMIN Y CAJERO)
+    // SOLICITUDES DE FACTURA
     Route::get('/admin/solicitudes', [SolicitudFacturaController::class, 'index'])->name('admin.solicitudes.index');
     Route::get('/admin/solicitudes/{id}', [SolicitudFacturaController::class, 'show'])->name('admin.solicitudes.show');
     Route::post('/admin/solicitudes/{id}/aprobar', [SolicitudFacturaController::class, 'aprobar'])->name('admin.solicitudes.aprobar');
@@ -221,7 +220,7 @@ Route::middleware(['auth', 'check.inactivity', 'password.check'])->group(functio
     ]);
     Route::get('/admin/promociones/{id}/toggle', [PromocionController::class, 'toggle'])->name('admin.promociones.toggle');
 
-    // CIERRES DE CAJA (CRUD COMPLETO)
+    // CIERRES DE CAJA
     Route::resource('admin/cierres', CierreCajaController::class)->names([
         'index' => 'admin.cierres.index',
         'create' => 'admin.cierres.create',
@@ -232,26 +231,83 @@ Route::middleware(['auth', 'check.inactivity', 'password.check'])->group(functio
         'destroy' => 'admin.cierres.destroy',
     ]);
 
-    // RUTAS DE PRUEBAS PARA ADMIN (SOLO UNA VEZ, NO DUPLICADAS)
-    Route::middleware(['role:1'])->group(function () {
-        Route::get('/admin/citas/crear-prueba', [App\Http\Controllers\Admin\PruebaController::class, 'crearCitaPrueba'])->name('admin.citas.crear-prueba');
-        Route::get('/admin/recordatorios/enviar', [App\Http\Controllers\Admin\PruebaController::class, 'enviarRecordatorios'])->name('admin.recordatorios.enviar');
+    // COMPRAS A PROVEEDORES
+    Route::prefix('admin/compras')->group(function () {
+        Route::get('/', [CompraController::class, 'index'])->name('admin.compras.index');
+        Route::get('/create', [CompraController::class, 'create'])->name('admin.compras.create');
+        Route::post('/store', [CompraController::class, 'store'])->name('admin.compras.store');
+        Route::get('/{id}', [CompraController::class, 'show'])->name('admin.compras.show');
+        Route::post('/{id}/recibir', [CompraController::class, 'recibir'])->name('admin.compras.recibir');
     });
 
-    // Panel de pruebas para Admin
-    Route::middleware(['auth', 'role:1'])->group(function () {
-        Route::get('/admin/pruebas', [App\Http\Controllers\Admin\PruebaController::class, 'index'])->name('admin.pruebas');
-        Route::post('/admin/pruebas/crear-cita', [App\Http\Controllers\Admin\PruebaController::class, 'crearCita'])->name('admin.pruebas.crear-cita');
-        Route::post('/admin/pruebas/enviar-recordatorios', [App\Http\Controllers\Admin\PruebaController::class, 'enviarRecordatorios'])->name('admin.pruebas.enviar-recordatorios');
-    });
+    // REPORTES
+    Route::get('/admin/productividad-groomer', [ReportController::class, 'productividadGroomer'])->name('admin.productividad.groomer');
 
-    Route::get('/admin/productividad-groomer', [App\Http\Controllers\Admin\ReportController::class, 'productividadGroomer'])->name('admin.productividad.groomer');
-
+    // MASCOTAS - RECOMENDACIONES
     Route::get('/mascotas/{id}/recomendaciones', [MascotaController::class, 'recomendaciones'])->name('mascotas.recomendaciones');
 
+    // HORARIOS OCUPADOS (AJAX)
     Route::get('/citas/horarios-ocupados/{groomer_id}/{fecha}', [CitaController::class, 'getHorariosOcupados'])->name('citas.horarios.ocupados');
 
+    // ALERTAS DE CONSUMO
+    Route::get('/admin/alertas-consumo', function() {
+        $alertas = DB::table('notificaciones')->where('tipo', 'CONSUMO_ELEVADO')->where('estado', 'PENDIENTE')->orderBy('created_at', 'desc')->get();
+        return view('admin.alertas_consumo', compact('alertas'));
+    })->name('admin.alertas.consumo');
 
+    Route::post('/admin/alertas/actualizar/{id}', function($id, Request $request) {
+        $accion = $request->input('accion');
+        $estado = ($accion == 'aprobar') ? 'APROBADA' : 'RECHAZADA';
+        
+        $alerta = DB::table('notificaciones')->where('id_notificacion', $id)->first();
+        preg_match('/El groomer ([^ ]+)/', $alerta->mensaje, $matches);
+        $nombreGroomer = $matches[1] ?? 'Desconocido';
+        $groomerUser = DB::table('users')->where('name', 'like', "%{$nombreGroomer}%")->first();
+        
+        $mensajeGroomer = ($accion == 'aprobar') 
+            ? "✅ Tu solicitud de consumo elevado ha sido APROBADA por el administrador."
+            : "❌ Tu solicitud de consumo elevado ha sido RECHAZADA por el administrador. Por favor, justifica el consumo.";
+        
+        if ($groomerUser) {
+            DB::table('notificaciones')->insert([
+                'id_usuario' => $groomerUser->id,
+                'tipo' => 'RESPUESTA_CONSUMO',
+                'mensaje' => $mensajeGroomer,
+                'canal' => 'EMAIL',
+                'destino' => $groomerUser->email,
+                'estado' => 'ENVIADO',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+        
+        DB::table('notificaciones')->where('id_notificacion', $id)->update([
+            'estado' => $estado,
+            'updated_at' => now()
+        ]);
+        
+        return redirect()->back()->with('success', "Alerta {$estado}. Se notificó al groomer.");
+    })->name('admin.alertas.actualizar');
+
+    // RUTAS DE PRUEBAS
+    Route::middleware(['role:1'])->group(function () {
+        Route::get('/admin/pruebas', [PruebaController::class, 'index'])->name('admin.pruebas');
+        Route::post('/admin/pruebas/crear-cita', [PruebaController::class, 'crearCita'])->name('admin.pruebas.crear-cita');
+        Route::post('/admin/pruebas/enviar-recordatorios', [PruebaController::class, 'enviarRecordatorios'])->name('admin.pruebas.enviar-recordatorios');
+    });
+
+    // =============================================
+    // RUTAS AJAX PARA COMPRAS (API para cargar productos/insumos)
+    // =============================================
+    Route::middleware(['auth', 'role:1'])->group(function () {
+        Route::get('/admin/productos/list', function() {
+            return App\Models\Producto::select('id_producto', 'nombre_producto as nombre', 'stock_actual')->get();
+        });
+        
+        Route::get('/admin/insumos/list', function() {
+            return App\Models\Insumo::select('id_insumo', 'nombre', 'stock_actual')->get();
+        });
+    });
 });
 
 // RUTA HOME
@@ -262,70 +318,3 @@ Route::get('/home', function () {
 if (file_exists(__DIR__.'/auth.php')) {
     require __DIR__.'/auth.php';
 }
-
-// Alertas de consumo - SOLO UNA VEZ
-Route::get('/admin/alertas-consumo', function() {
-    $alertas = DB::table('notificaciones')
-        ->where('tipo', 'CONSUMO_ELEVADO')
-        ->where('estado', 'PENDIENTE')
-        ->orderBy('created_at', 'desc')
-        ->get();
-    return view('admin.alertas_consumo', compact('alertas'));
-})->name('admin.alertas.consumo');
-
-Route::post('/admin/alertas/actualizar/{id}', function($id, Request $request) {
-    $accion = $request->input('accion');
-    $estado = ($accion == 'aprobar') ? 'APROBADA' : 'RECHAZADA';
-    
-    DB::table('notificaciones')
-        ->where('id_notificacion', $id)
-        ->update([
-            'estado' => $estado,
-            'updated_at' => now()
-        ]);
-    
-    return redirect()->back()->with('success', "Alerta {$estado} correctamente");
-})->name('admin.alertas.actualizar');
-
-Route::post('/admin/alertas/actualizar/{id}', function($id, Request $request) {
-    $accion = $request->input('accion');
-    $estado = ($accion == 'aprobar') ? 'APROBADA' : 'RECHAZADA';
-    
-    // Obtener la alerta antes de actualizar
-    $alerta = DB::table('notificaciones')->where('id_notificacion', $id)->first();
-    
-    // Extraer el groomer del mensaje (ej: "⚠️ ALERTA: El groomer Ana Estilista registró...")
-    preg_match('/El groomer ([^ ]+)/', $alerta->mensaje, $matches);
-    $nombreGroomer = $matches[1] ?? 'Desconocido';
-    
-    // Buscar el ID del usuario groomer por su nombre
-    $groomerUser = DB::table('users')->where('name', 'like', "%{$nombreGroomer}%")->first();
-    
-    // Crear notificación para el GROOMER
-    $mensajeGroomer = ($accion == 'aprobar') 
-        ? "✅ Tu solicitud de consumo elevado ha sido APROBADA por el administrador."
-        : "❌ Tu solicitud de consumo elevado ha sido RECHAZADA por el administrador. Por favor, justifica el consumo.";
-    
-    if ($groomerUser) {
-        DB::table('notificaciones')->insert([
-            'id_usuario' => $groomerUser->id,
-            'tipo' => 'RESPUESTA_CONSUMO',
-            'mensaje' => $mensajeGroomer,
-            'canal' => 'EMAIL',
-            'destino' => $groomerUser->email,
-            'estado' => 'ENVIADO',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-    }
-    
-    // Actualizar la alerta original
-    DB::table('notificaciones')
-        ->where('id_notificacion', $id)
-        ->update([
-            'estado' => $estado,
-            'updated_at' => now()
-        ]);
-    
-    return redirect()->back()->with('success', "Alerta {$estado}. Se notificó al groomer.");
-})->name('admin.alertas.actualizar');

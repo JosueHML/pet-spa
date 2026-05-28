@@ -8,8 +8,7 @@
                 <i class="fas fa-bell"></i> Mis Notificaciones
             </div>
             @if(Auth::user()->id_rol == 1)
-                <a href="{{ route('admin.recordatorios.enviar') }}" class="btn btn-warning btn-sm">
-                    <i class="fas fa-clock"></i> ⏰ Enviar Recordatorios Ahora
+                <a href="{{ url('/admin/recordatorios/enviar') }}" class="btn btn-warning btn-sm">                    <i class="fas fa-clock"></i> ⏰ Enviar Recordatorios Ahora
                 </a>
             @endif
         </div>

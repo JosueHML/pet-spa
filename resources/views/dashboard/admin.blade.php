@@ -53,6 +53,16 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- INSUMOS - TARJETA CORREGIDA (dentro del row) -->
+                        <div class="col-md-4 mb-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <i class="fas fa-flask fa-2x text-info mb-2"></i>
+                                    <h5>Insumos</h5>
+                                    <a href="{{ route('insumos.index') }}" class="btn btn-sm btn-info">Gestionar</a>
+                                </div>
+                            </div>
+                        </div>
                         <div class="col-md-4 mb-3">
                             <div class="card text-center">
                                 <div class="card-body">
@@ -122,6 +132,15 @@
                                     <i class="fas fa-cash-register fa-2x text-secondary mb-2"></i>
                                     <h5>Cierre de Caja</h5>
                                     <a href="{{ route('admin.cierres.index') }}" class="btn btn-sm btn-secondary">Gestionar</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <i class="fas fa-truck fa-2x text-secondary mb-2"></i>
+                                    <h5>Compras a Proveedores</h5>
+                                    <a href="{{ route('admin.compras.index') }}" class="btn btn-sm btn-secondary">Gestionar</a>
                                 </div>
                             </div>
                         </div>
