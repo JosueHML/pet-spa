@@ -19,25 +19,37 @@
                     @else
                         <table class="table table-bordered">
                             <thead>
-                                <tr><th>Nombre</th><th>Raza</th><th>Tamaño</th><th>Acciones</th></tr>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Raza</th>
+                                    <th>Tamaño</th>
+                                    <th>Acciones</th>
+                                </tr>
                             </thead>
                             <tbody>
                                 @foreach($mascotas as $mascota)
                                 <tr>
-                                    <td>{{ $mascota->nombre_mascota }}</td>  <!-- ← CAMBIADO -->
+                                    <td>{{ $mascota->nombre_mascota }}</td>
                                     <td>{{ $mascota->raza ?? '-' }}</td>
                                     <td>{{ $mascota->tamanio }}</td>
                                     <td>
                                         <a href="{{ route('mascotas.edit', $mascota->id_mascota) }}" class="btn btn-warning btn-sm">Editar</a>
+                                        
+                                        <!-- BOTÓN DE RECOMENDACIONES IA - AHORA DENTRO DEL BUCLE -->
+                                        <a href="{{ route('mascotas.recomendaciones', $mascota->id_mascota) }}" class="btn btn-info btn-sm">
+                                            <i class="fas fa-robot"></i> 🤖 Recomendaciones IA
+                                        </a>
+                                        
                                         <form action="{{ route('mascotas.destroy', $mascota->id_mascota) }}" method="POST" style="display:inline-block;">
-                                            @csrf @method('DELETE')
+                                            @csrf 
+                                            @method('DELETE')
                                             <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar?')">Eliminar</button>
                                         </form>
                                     </td>
                                 </tr>
                                 @endforeach
                             </tbody>
-                        </table>
+                        </tr>
                     @endif
                 </div>
             </div>
@@ -45,7 +57,3 @@
     </div>
 </div>
 @endsection
-
-<a href="{{ route('mascotas.recomendaciones', $mascota->id_mascota) }}" class="btn btn-info btn-sm">
-    <i class="fas fa-robot"></i> 🤖 Recomendaciones IA
-</a>
