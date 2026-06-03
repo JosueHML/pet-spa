@@ -3,23 +3,21 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'Pet Spa') }} | El mejor cuidado para tu mascota</title>
 
-    <!-- Fonts -->
-    <link rel="dns-prefetch" href="//fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=Nunito:400,600,700,800" rel="stylesheet">
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
 
+    <!-- Bootstrap CSS (CDN - funciona en celular) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
-    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
 
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
 
@@ -99,9 +97,36 @@
         .nav-item {
             position: relative;
         }
+        
+        /* Tarjetas de métricas */
+        .dashboard-metrics {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+        .card-metric {
+            flex: 1;
+            min-width: 200px;
+            padding: 20px;
+            border-radius: 15px;
+            color: white;
+            text-align: center;
+        }
+        .bg-metric-primary { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .bg-metric-success { background: linear-gradient(135deg, #11998e, #38ef7d); }
+        .bg-metric-warning { background: linear-gradient(135deg, #f093fb, #f5576c); }
+        .bg-metric-info { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+        .card-metric h3 { font-size: 2rem; margin-bottom: 5px; }
+        .card-metric p { margin: 0; opacity: 0.9; }
     </style>
 
-    @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(() => console.log('Service Worker registrado correctamente'));
+        }
+    </script>
 </head>
 <body>
     <div id="app">
@@ -189,7 +214,6 @@
                                 </a>
 
                                 <div class="dropdown-menu dropdown-menu-end shadow-lg">
-                                    <!-- Opciones solo para ADMIN -->
                                     @if(Auth::user()->id_rol == 1)
                                         <a class="dropdown-item" href="{{ route('admin.users.index') }}">
                                             <i class="fas fa-users"></i> Gestionar Personal
@@ -203,13 +227,11 @@
                                         <div class="dropdown-divider"></div>
                                     @endif
                                     
-                                    <!-- Cambiar Contraseña (todos) -->
                                     <a class="dropdown-item" href="{{ route('password.change') }}">
                                         <i class="fas fa-key"></i> Cambiar Contraseña
                                     </a>
                                     <div class="dropdown-divider"></div>
                                     
-                                    <!-- Cerrar Sesión (todos) -->
                                     <a class="dropdown-item text-danger" href="{{ route('logout') }}"
                                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                         <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
@@ -230,5 +252,8 @@
             @yield('content')
         </main>
     </div>
+
+    <!-- Bootstrap JS (CDN - funciona en celular) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
